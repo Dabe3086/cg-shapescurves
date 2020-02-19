@@ -98,6 +98,87 @@ class Renderer {
     // framebuffer:  canvas ctx image data
     drawLine(pt0, pt1, color, framebuffer)
     {
-        // code from class here
+	    if (Math.abs(pt1.y - pt0.y) <= Math.abs(pt1.x - pt0.x))
+	    {
+		    if (pt0.x < pt1.x)
+		    {
+			    drawLineLow(pt0.x, pt0.y, pt1.x, pt1.y, color, framebuffer);
+		    }
+		    else
+		    {
+			    drawLineLow(pt1.x, pt1.y, pt0.x, pt0.y, color, framebuffer);
+		    }
+	    }
+	    else
+	    {
+		    if (pt0.y < pt1.y)
+		    {
+			    drawLineHigh(pt0.x, pt0.y, pt1.x, pt1.y, color, framebuffer);
+		    }
+		    else
+		    {
+			    drawLineHigh(pt1.x, pt1.y, pt0.x, pt0.y, color, framebuffer);
+		    }
+	    }
+    }
+
+    drawLineLow(pt0, pt1, color, framebuffer)
+    {
+	    var A = y1 - y0;
+	    var B = x0 - x1;
+	    var iy = 1;
+	    if (A < 0) {
+		    iy = -1;
+		    A *= -1;
+	    }
+	    var D = 2 * A + B;
+	    var x = x0;
+	    var y = y0;
+	    var px;
+	    while (x <= x1)
+	    {
+		    px = pixelIndex(x, y, framebuffer);
+		    setFramebufferColor(framebuffer, px, color);
+		    x += 1;
+		    if (D <= 0)
+		    {
+			    D += 2 * A;
+		    }
+		    else
+		    {
+			    D += 2 * A + 2 * B;
+			    y += iy;
+		    }
+	    }
+    }
+
+    drawLineHigh(x0, y0, x1, y1, color, framebuffer)
+    {
+	    var A = x1 - x0;
+	    var B = y0 - y1;
+	    var ix = 1;
+	    if (A < 0) {
+		    ix = -1;
+		    A *= -1;
+	    }
+	    var D = 2 * A + B;
+	    var x = x0;
+	    var y = y0;
+	    var px;
+	    while (y <= y1)
+	    {
+		    px = pixelIndex(x, y, framebuffer);
+		    setFramebufferColor(framebuffer, px, color);
+		    y += 1;
+		    if (D <= 0)
+		    {
+			    D += 2 * A;
+		    }
+		    else
+		    {
+			    D += 2 * A + 2 * B;
+			    x += ix;
+		    }
+	    }
     }
 };
