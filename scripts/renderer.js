@@ -48,22 +48,22 @@ class Renderer {
 
     // framebuffer:  canvas ctx image data
     drawSlide0(framebuffer) {
-        
+        drawRectangle({x: 100, y:100}, {x:400, y:300}, [155,0,155,255], framebuffer);
     }
 
     // framebuffer:  canvas ctx image data
     drawSlide1(framebuffer) {
-
+        drawCirle({x:400, y: 300}, 100, [0,155,155,255], framebuffer);
     }
 
     // framebuffer:  canvas ctx image data
     drawSlide2(framebuffer) {
-
+        drawBezierCurve({x:100, y: 100}, {x:300, y: 500}, {x:450, y: 400}, {x:500, y: 200}, [155,155,0,255], framebuffer);
     }
 
     // framebuffer:  canvas ctx image data
     drawSlide3(framebuffer) {
-
+        
     }
 
     // left_bottom:  object ({x: __, y: __})
@@ -71,7 +71,10 @@ class Renderer {
     // color:        array of int [R, G, B, A]
     // framebuffer:  canvas ctx image data
     drawRectangle(left_bottom, right_top, color, framebuffer) {
-        
+        drawLine(left_bottom, {left_bottom.y, right_top.x}, color, framebuffer);
+        drawLine({left_bottom.y, right_top.x}, right_top, color, framebuffer);
+        drawLine(right_top, {left_bottom.x, right_top.y}, color, framebuffer);
+        drawLine({left_bottom.x, right_top.y}, left_bottom, color, framebuffer);
     }
 
     // center:       object ({x: __, y: __})
@@ -79,7 +82,17 @@ class Renderer {
     // color:        array of int [R, G, B, A]
     // framebuffer:  canvas ctx image data
     drawCirle(center, radius, color, framebuffer) {
-        
+        var px, x, y;
+        for(var i = 1; i < num_curve_sections; i++)
+        {
+            x0 = (center.x + radius * Math.cos(i - 1)) % (num_curve_sections);
+            y0 = (center.y + radius * Math.cos(i - 1)) % (num_curve_sections);
+            x1 = center.x + radius * Math.cos(i);
+            y1 = center.y + radius * Math.cos(i);
+            pt0 = {x: x0, y: y0};
+            pt1 = {x: x1, y: y0};
+            drawLine(pt0, pt1, color, framebuffer);
+        }
     }
 
     // pt0:          object ({x: __, y: __})
@@ -89,7 +102,19 @@ class Renderer {
     // color:        array of int [R, G, B, A]
     // framebuffer:  canvas ctx image data
     drawBezierCurve(pt0, pt1, pt2, pt3, color, framebuffer) {
+        var px, x, y;
         
+        for(var t = 0, t < 1; t += (1/ num_curve_sections))
+        {
+            var t_add = t + (1/num_curve_sections);
+            x0 = Math.pow((1 - t), 3) * pt0.x + 3 * Math.pow((1-t), 2) * t * pt1.x + 3 * (1 - t) * Math.pow(t, 2) * pt2.x + Math.pow(t, 3) * pt3.x;
+            y0 = Math.pow((1 - t), 3) * pt0.y + 3 * Math.pow((1-t), 2) * t * pt1.y + 3 * (1 - t) * Math.pow(t, 2) * pt2.y + Math.pow(t, 3) * pt3.y;
+            x1 = Math.pow((1 - t_add), 3) * pt0.x + 3 * Math.pow((1-t_add), 2) * t_add * pt1.x + 3 * (1 - t_add) * Math.pow(t_add, 2) * pt2.x + Math.pow(t_add, 3) * pt3.x;
+            y1 = Math.pow((1 - t_add), 3) * pt0.y + 3 * Math.pow((1-t_add), 2) * t_add * pt1.y + 3 * (1 - t_add) * Math.pow(t_add, 2) * pt2.y + Math.pow(t_add, 3) * pt3.y;
+            pt0 = {x: x0, y: y0};
+            pt1 = {x: x1, y: y0};
+            drawLine(pt0, pt1, color, framebuffer);
+        }
     }
 
     // pt0:          object ({x: __, y: __})
@@ -103,10 +128,18 @@ class Renderer {
 		    if (pt0.x < pt1.x)
 		    {
 			    drawLineLow(pt0.x, pt0.y, pt1.x, pt1.y, color, framebuffer);
+                if(show_points)
+                {
+                    drawCirle(pt0, 2, [0, 0, 0, 255], framebuffer);
+                }
 		    }
 		    else
 		    {
 			    drawLineLow(pt1.x, pt1.y, pt0.x, pt0.y, color, framebuffer);
+                if(show_points)
+                {
+                    drawCirle(pt0, 2, [0, 0, 0, 255], framebuffer);
+                }
 		    }
 	    }
 	    else
@@ -114,28 +147,36 @@ class Renderer {
 		    if (pt0.y < pt1.y)
 		    {
 			    drawLineHigh(pt0.x, pt0.y, pt1.x, pt1.y, color, framebuffer);
+                if(show_points)
+                {
+                    drawCirle(pt0, 2, [0, 0, 0, 255], framebuffer);
+                }
 		    }
 		    else
 		    {
 			    drawLineHigh(pt1.x, pt1.y, pt0.x, pt0.y, color, framebuffer);
+                if(show_points)
+                {
+                    drawCirle(pt0, 2, [0, 0, 0, 255], framebuffer);
+                }
 		    }
 	    }
     }
 
     drawLineLow(pt0, pt1, color, framebuffer)
     {
-	    var A = y1 - y0;
-	    var B = x0 - x1;
+	    var A = pt1.y - pt0.y;
+	    var B = pt0.x - pt1.x;
 	    var iy = 1;
 	    if (A < 0) {
 		    iy = -1;
 		    A *= -1;
 	    }
 	    var D = 2 * A + B;
-	    var x = x0;
-	    var y = y0;
+	    var x = pt0.x;
+	    var y = pt0.y;
 	    var px;
-	    while (x <= x1)
+	    while (x <= pt1.x)
 	    {
 		    px = pixelIndex(x, y, framebuffer);
 		    setFramebufferColor(framebuffer, px, color);
@@ -152,20 +193,20 @@ class Renderer {
 	    }
     }
 
-    drawLineHigh(x0, y0, x1, y1, color, framebuffer)
+    drawLineHigh(pt0, pt1, color, framebuffer)
     {
-	    var A = x1 - x0;
-	    var B = y0 - y1;
+	    var A = pt1.x - pt0.x;
+	    var B = pt0.y - pt1.y;
 	    var ix = 1;
 	    if (A < 0) {
 		    ix = -1;
 		    A *= -1;
 	    }
 	    var D = 2 * A + B;
-	    var x = x0;
-	    var y = y0;
+	    var x = pt0.x;
+	    var y = pt0.y;
 	    var px;
-	    while (y <= y1)
+	    while (y <= pt1.y)
 	    {
 		    px = pixelIndex(x, y, framebuffer);
 		    setFramebufferColor(framebuffer, px, color);
