@@ -109,18 +109,20 @@ class Renderer {
     // color:        array of int [R, G, B, A]
     // framebuffer:  canvas ctx image data
     drawBezierCurve(pt0, pt1, pt2, pt3, color, framebuffer) {
-        var x0, x1, y0, y1, pt0, pt1;
-        for(var t = 0; t < 1; t += (1/ this.num_curve_sections))
+        var x0, x1, y0, y1, point0, point1;
+        var t = 0;
+        var t_add =(1/ this.num_curve_sections);
+        for(var i = 0; i < this.num_curve_sections; i++)
         {
-            var t_add = t + (1/ this.num_curve_sections);
-            x0 = Math.pow((1 - t), 3) * pt0.x + 3 * Math.pow((1-t), 2) * t * pt1.x + 3 * (1 - t) * Math.pow(t, 2) * pt2.x + Math.pow(t, 3) * pt3.x;
-            y0 = Math.pow((1 - t), 3) * pt0.y + 3 * Math.pow((1-t), 2) * t * pt1.y + 3 * (1 - t) * Math.pow(t, 2) * pt2.y + Math.pow(t, 3) * pt3.y;
-            x1 = Math.pow((1 - t_add), 3) * pt0.x + 3 * Math.pow((1-t_add), 2) * t_add * pt1.x + 3 * (1 - t_add) * Math.pow(t_add, 2) * pt2.x + Math.pow(t_add, 3) * pt3.x;
-            y1 = Math.pow((1 - t_add), 3) * pt0.y + 3 * Math.pow((1-t_add), 2) * t_add * pt1.y + 3 * (1 - t_add) * Math.pow(t_add, 2) * pt2.y + Math.pow(t_add, 3) * pt3.y;
-            pt0 = {x: x0, y: y0};
-            pt1 = {x: x1, y: y0};
-            this.drawLine(pt0, pt1, color, framebuffer);
-            this.drawEndPoint(pt0, 2, [0, 0, 0, 255], framebuffer);
+            x0 = Math.round(Math.pow((1 - t), 3) * pt0.x + 3 * Math.pow((1-t), 2) * t * pt1.x + 3 * (1 - t) * Math.pow(t, 2) * pt2.x + Math.pow(t, 3) * pt3.x);
+            y0 = Math.round(Math.pow((1 - t), 3) * pt0.y + 3 * Math.pow((1-t), 2) * t * pt1.y + 3 * (1 - t) * Math.pow(t, 2) * pt2.y + Math.pow(t, 3) * pt3.y);
+            t = t + t_add;
+            x1 = Math.round(Math.pow((1 - t), 3) * pt0.x + 3 * Math.pow((1-t), 2) * t * pt1.x + 3 * (1 - t) * Math.pow(t, 2) * pt2.x + Math.pow(t, 3) * pt3.x);
+            y1 = Math.round(Math.pow((1 - t), 3) * pt0.y + 3 * Math.pow((1-t), 2) * t * pt1.y + 3 * (1 - t) * Math.pow(t, 2) * pt2.y + Math.pow(t, 3) * pt3.y);
+            point0 = {x: x0, y: y0};
+            point1 = {x: x1, y: y1};
+            this.drawLine(point0, point1, color, framebuffer);
+            this.drawEndPoint(point0, 2, [0, 0, 0, 255], framebuffer);
         }
     }
 
@@ -130,13 +132,13 @@ class Renderer {
             var x0, x1, y0, y1, pt0, pt1;
             for(var i = 0; i < 2 * Math.PI; i = i + (2 * Math.PI) / 20)
             {
-                x0 = (center.x + radius * Math.cos(i - 1));
-                y0 = (center.y + radius * Math.sin(i - 1));
-                x1 = center.x + radius * Math.cos(i);
-                y1 = center.y + radius * Math.sin(i);
-                pt0 = {x: x0, y: y0};
-                pt1 = {x: x1, y: y0};
-                this.drawLine(pt0, pt1, color, framebuffer);
+            x0 = Math.round(center.x + radius * Math.cos(i - ((2 * Math.PI) / this.num_curve_sections)));
+            y0 = Math.round(center.y + radius * Math.sin(i - ((2 * Math.PI) / this.num_curve_sections)));
+            x1 = Math.round(center.x + radius * Math.cos(i));
+            y1 = Math.round(center.y + radius * Math.sin(i));
+            pt0 = {x: x0, y: y0};
+            pt1 = {x: x1, y: y1};
+            this.drawLine(pt0, pt1, color, framebuffer);
             }
         }
     }
@@ -148,7 +150,6 @@ class Renderer {
     // framebuffer:  canvas ctx image data
     drawLine(pt0, pt1, color, framebuffer)
     {
-        console.log(pt0, pt1);
 	    if (Math.abs(pt1.y - pt0.y) <= Math.abs(pt1.x - pt0.x))
 	    {
 		    if (pt0.x < pt1.x)
