@@ -65,6 +65,25 @@ class Renderer {
     // framebuffer:  canvas ctx image data
     drawSlide3(framebuffer) {
         this.drawRectangle({x:25, y:100}, {x:40, y:300}, [155,0,155,255], framebuffer);
+        this.drawBezierCurve({x:40, y: 300}, {x: 100, y: 400}, {x: 100, y:200}, {x: 40, y: 200}, [155,0,155,255], framebuffer);
+        this.drawBezierCurve({x:40, y: 200}, {x: 100, y: 150}, {x: 100, y:100}, {x: 40, y: 100}, [155,0,155,255], framebuffer);
+        this.drawRectangle({x:100, y:100}, {x:110, y:200}, [155,0,155,255], framebuffer);
+        this.drawLine({x:110, y:175}, {x:130, y:200}, [155,0,155,255], framebuffer);
+        this.drawEndPoint({x:110, y:175}, 2, [0, 0, 0, 255], framebuffer);
+        this.drawEndPoint({x:130, y:200}, 2, [0, 0, 0, 255], framebuffer);
+        this.drawLine({x:130, y:200}, {x:150, y:175}, [155,0,155,255], framebuffer);
+        this.drawEndPoint({x:150, y:175}, 2, [0, 0, 0, 255], framebuffer);
+        this.drawLine({x:163, y:150}, {x:225, y:150}, [155,0,155,255], framebuffer);
+        this.drawEndPoint({x:163, y:150}, 2, [0, 0, 0, 255], framebuffer);
+        this.drawBezierCurve({x:225, y: 150}, {x: 145, y: 300}, {x: 130, y:75}, {x: 225, y: 100}, [155,0,155,255], framebuffer);
+        this.drawRectangle({x:235, y:100}, {x:250, y:200}, [155,0,155,255], framebuffer);
+        this.drawBezierCurve({x:250, y: 175}, {x: 300, y: 280}, {x: 275, y:100}, {x: 300, y: 100}, [155,0,155,255], framebuffer);
+        this.drawCirle({x:375, y: 150}, 50, [155,0,155,255], framebuffer);
+        this.drawRectangle({x:425, y:100}, {x:435, y:300}, [155,0,155,255], framebuffer);
+        this.drawCirle({x:500, y: 150}, 50, [155,0,155,255], framebuffer);
+        this.drawRectangle({x:550, y:100}, {x:560, y:200}, [155,0,155,255], framebuffer);
+        this.drawRectangle({x:575, y:100}, {x:590, y:200}, [155,0,155,255], framebuffer);
+        this.drawBezierCurve({x:590, y: 175}, {x: 640, y: 280}, {x: 615, y:100}, {x: 640, y: 100}, [155,0,155,255], framebuffer);
     }
 
     // left_bottom:  object ({x: __, y: __})
@@ -123,6 +142,10 @@ class Renderer {
             point1 = {x: x1, y: y1};
             this.drawLine(point0, point1, color, framebuffer);
             this.drawEndPoint(point0, 2, [0, 0, 0, 255], framebuffer);
+            if(i == this.num_curve_sections - 1)
+            {
+                this.drawEndPoint(point1, 2, [0, 0, 0, 255], framebuffer);
+            }
         }
     }
 
