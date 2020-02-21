@@ -91,12 +91,12 @@ class Renderer {
         var x0, x1, y0, y1, pt0, pt1;
         for(var i = 0; i < 2 * Math.PI; i = i + (2 * Math.PI) / this.num_curve_sections)
         {
-            x0 = Math.round(center.x + radius * Math.cos(i - 1));
-            y0 = Math.round(center.y + radius * Math.sin(i - 1));
+            x0 = Math.round(center.x + radius * Math.cos(i - ((2 * Math.PI) / this.num_curve_sections)));
+            y0 = Math.round(center.y + radius * Math.sin(i - ((2 * Math.PI) / this.num_curve_sections)));
             x1 = Math.round(center.x + radius * Math.cos(i));
             y1 = Math.round(center.y + radius * Math.sin(i));
             pt0 = {x: x0, y: y0};
-            pt1 = {x: x1, y: y0};
+            pt1 = {x: x1, y: y1};
             this.drawLine(pt0, pt1, color, framebuffer);
             this.drawEndPoint(pt0, 2, [0, 0, 0, 255], framebuffer);
         }
