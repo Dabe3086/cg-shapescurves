@@ -71,8 +71,8 @@ class Renderer {
     // color:        array of int [R, G, B, A]
     // framebuffer:  canvas ctx image data
     drawRectangle(left_bottom, right_top, color, framebuffer) {
-        drawLine(left_bottom, {left_bottom.y, right_top.x}, color, framebuffer);
-        drawLine({left_bottom.y, right_top.x}, right_top, color, framebuffer);
+        drawLine(left_bottom, {right_top.x, left_bottom.y}, color, framebuffer);
+        drawLine({right_top.x, left_bottom.y}, right_top, color, framebuffer);
         drawLine(right_top, {left_bottom.x, right_top.y}, color, framebuffer);
         drawLine({left_bottom.x, right_top.y}, left_bottom, color, framebuffer);
     }
