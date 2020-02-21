@@ -20,6 +20,7 @@ class Renderer {
     // flag:  bool
     showPoints(flag) {
         this.show_points = flag;
+        this.drawSlide(this.slide_idx);
     }
     
     // slide_idx:  int
@@ -48,17 +49,17 @@ class Renderer {
 
     // framebuffer:  canvas ctx image data
     drawSlide0(framebuffer) {
-        drawRectangle({x: 100, y:100}, {x:400, y:300}, [155,0,155,255], framebuffer);
+        this.drawRectangle({x: 100, y:100}, {x:400, y:300}, [155,0,155,255], framebuffer);
     }
 
     // framebuffer:  canvas ctx image data
     drawSlide1(framebuffer) {
-        drawCirle({x:400, y: 300}, 100, [0,155,155,255], framebuffer);
+        this.drawCirle({x:400, y: 300}, 100, [0,155,155,255], framebuffer);
     }
 
     // framebuffer:  canvas ctx image data
     drawSlide2(framebuffer) {
-        drawBezierCurve({x:100, y: 100}, {x:300, y: 500}, {x:450, y: 400}, {x:500, y: 200}, [155,155,0,255], framebuffer);
+        this.drawBezierCurve({x:100, y: 100}, {x:300, y: 500}, {x:450, y: 400}, {x:500, y: 200}, [155,155,0,255], framebuffer);
     }
 
     // framebuffer:  canvas ctx image data
@@ -71,10 +72,15 @@ class Renderer {
     // color:        array of int [R, G, B, A]
     // framebuffer:  canvas ctx image data
     drawRectangle(left_bottom, right_top, color, framebuffer) {
-        drawLine(left_bottom, {right_top.x, left_bottom.y}, color, framebuffer);
-        drawLine({right_top.x, left_bottom.y}, right_top, color, framebuffer);
-        drawLine(right_top, {left_bottom.x, right_top.y}, color, framebuffer);
-        drawLine({left_bottom.x, right_top.y}, left_bottom, color, framebuffer);
+        this.drawLine(left_bottom, {x: right_top.x, y: left_bottom.y}, color, framebuffer);
+        this.drawEndPoint(left_bottom, 2, [0, 0, 0, 255], framebuffer);
+        this.drawLine({x: right_top.x, y: left_bottom.y}, right_top, color, framebuffer);
+        this.drawEndPoint({x: right_top.x, y: left_bottom.y}, 2, [0, 0, 0, 255], framebuffer);
+        this.drawLine(right_top, {x: left_bottom.x, y: right_top.y}, color, framebuffer);
+        this.drawEndPoint(right_top, 2, [0, 0, 0, 255], framebuffer);
+        this.drawLine({x: left_bottom.x, y: right_top.y}, left_bottom, color, framebuffer);
+        this.drawEndPoint({x: left_bottom.x, y: right_top.y}, 2, [0, 0, 0, 255], framebuffer);
+        
     }
 
     // center:       object ({x: __, y: __})
@@ -82,16 +88,17 @@ class Renderer {
     // color:        array of int [R, G, B, A]
     // framebuffer:  canvas ctx image data
     drawCirle(center, radius, color, framebuffer) {
-        var px, x, y;
-        for(var i = 1; i < num_curve_sections; i++)
+        var x0, x1, y0, y1, pt0, pt1;
+        for(var i = 0; i < 2 * Math.PI; i = i + (2 * Math.PI) / this.num_curve_sections)
         {
-            x0 = (center.x + radius * Math.cos(i - 1)) % (num_curve_sections);
-            y0 = (center.y + radius * Math.cos(i - 1)) % (num_curve_sections);
-            x1 = center.x + radius * Math.cos(i);
-            y1 = center.y + radius * Math.cos(i);
+            x0 = Math.round(center.x + radius * Math.cos(i - 1));
+            y0 = Math.round(center.y + radius * Math.sin(i - 1));
+            x1 = Math.round(center.x + radius * Math.cos(i));
+            y1 = Math.round(center.y + radius * Math.sin(i));
             pt0 = {x: x0, y: y0};
             pt1 = {x: x1, y: y0};
-            drawLine(pt0, pt1, color, framebuffer);
+            this.drawLine(pt0, pt1, color, framebuffer);
+            this.drawEndPoint(pt0, 2, [0, 0, 0, 255], framebuffer);
         }
     }
 
@@ -102,20 +109,38 @@ class Renderer {
     // color:        array of int [R, G, B, A]
     // framebuffer:  canvas ctx image data
     drawBezierCurve(pt0, pt1, pt2, pt3, color, framebuffer) {
-        var px, x, y;
-        
-        for(var t = 0, t < 1; t += (1/ num_curve_sections))
+        var x0, x1, y0, y1, pt0, pt1;
+        for(var t = 0; t < 1; t += (1/ this.num_curve_sections))
         {
-            var t_add = t + (1/num_curve_sections);
+            var t_add = t + (1/ this.num_curve_sections);
             x0 = Math.pow((1 - t), 3) * pt0.x + 3 * Math.pow((1-t), 2) * t * pt1.x + 3 * (1 - t) * Math.pow(t, 2) * pt2.x + Math.pow(t, 3) * pt3.x;
             y0 = Math.pow((1 - t), 3) * pt0.y + 3 * Math.pow((1-t), 2) * t * pt1.y + 3 * (1 - t) * Math.pow(t, 2) * pt2.y + Math.pow(t, 3) * pt3.y;
             x1 = Math.pow((1 - t_add), 3) * pt0.x + 3 * Math.pow((1-t_add), 2) * t_add * pt1.x + 3 * (1 - t_add) * Math.pow(t_add, 2) * pt2.x + Math.pow(t_add, 3) * pt3.x;
             y1 = Math.pow((1 - t_add), 3) * pt0.y + 3 * Math.pow((1-t_add), 2) * t_add * pt1.y + 3 * (1 - t_add) * Math.pow(t_add, 2) * pt2.y + Math.pow(t_add, 3) * pt3.y;
             pt0 = {x: x0, y: y0};
             pt1 = {x: x1, y: y0};
-            drawLine(pt0, pt1, color, framebuffer);
+            this.drawLine(pt0, pt1, color, framebuffer);
+            this.drawEndPoint(pt0, 2, [0, 0, 0, 255], framebuffer);
         }
     }
+
+    drawEndPoint(center, radius, color, framebuffer) {
+        if(this.show_points)
+        {
+            var x0, x1, y0, y1, pt0, pt1;
+            for(var i = 0; i < 2 * Math.PI; i = i + (2 * Math.PI) / 20)
+            {
+                x0 = (center.x + radius * Math.cos(i - 1));
+                y0 = (center.y + radius * Math.sin(i - 1));
+                x1 = center.x + radius * Math.cos(i);
+                y1 = center.y + radius * Math.sin(i);
+                pt0 = {x: x0, y: y0};
+                pt1 = {x: x1, y: y0};
+                this.drawLine(pt0, pt1, color, framebuffer);
+            }
+        }
+    }
+
 
     // pt0:          object ({x: __, y: __})
     // pt1:          object ({x: __, y: __})
@@ -123,42 +148,28 @@ class Renderer {
     // framebuffer:  canvas ctx image data
     drawLine(pt0, pt1, color, framebuffer)
     {
+        console.log(pt0, pt1);
 	    if (Math.abs(pt1.y - pt0.y) <= Math.abs(pt1.x - pt0.x))
 	    {
 		    if (pt0.x < pt1.x)
 		    {
-			    drawLineLow(pt0.x, pt0.y, pt1.x, pt1.y, color, framebuffer);
-                if(show_points)
-                {
-                    drawCirle(pt0, 2, [0, 0, 0, 255], framebuffer);
-                }
+			    this.drawLineLow(pt0, pt1, color, framebuffer);
+
 		    }
 		    else
 		    {
-			    drawLineLow(pt1.x, pt1.y, pt0.x, pt0.y, color, framebuffer);
-                if(show_points)
-                {
-                    drawCirle(pt0, 2, [0, 0, 0, 255], framebuffer);
-                }
+			    this.drawLineLow(pt1, pt0, color, framebuffer);
 		    }
 	    }
 	    else
 	    {
 		    if (pt0.y < pt1.y)
 		    {
-			    drawLineHigh(pt0.x, pt0.y, pt1.x, pt1.y, color, framebuffer);
-                if(show_points)
-                {
-                    drawCirle(pt0, 2, [0, 0, 0, 255], framebuffer);
-                }
+			    this.drawLineHigh(pt0, pt1, color, framebuffer); 
 		    }
 		    else
 		    {
-			    drawLineHigh(pt1.x, pt1.y, pt0.x, pt0.y, color, framebuffer);
-                if(show_points)
-                {
-                    drawCirle(pt0, 2, [0, 0, 0, 255], framebuffer);
-                }
+			    this.drawLineHigh(pt1, pt0, color, framebuffer);
 		    }
 	    }
     }
@@ -178,8 +189,8 @@ class Renderer {
 	    var px;
 	    while (x <= pt1.x)
 	    {
-		    px = pixelIndex(x, y, framebuffer);
-		    setFramebufferColor(framebuffer, px, color);
+		    px = this.pixelIndex(x, y, framebuffer);
+		    this.setFramebufferColor(framebuffer, px, color);
 		    x += 1;
 		    if (D <= 0)
 		    {
@@ -208,8 +219,8 @@ class Renderer {
 	    var px;
 	    while (y <= pt1.y)
 	    {
-		    px = pixelIndex(x, y, framebuffer);
-		    setFramebufferColor(framebuffer, px, color);
+		    px = this.pixelIndex(x, y, framebuffer);
+		    this.setFramebufferColor(framebuffer, px, color);
 		    y += 1;
 		    if (D <= 0)
 		    {
@@ -221,5 +232,17 @@ class Renderer {
 			    x += ix;
 		    }
 	    }
+    }
+    pixelIndex(x, y, framebuffer)
+    {
+        return 4 * y * framebuffer.width + 4 * x;
+    }
+
+    setFramebufferColor(framebuffer, px, color)
+    {
+        framebuffer.data[px + 0] = color[0];
+        framebuffer.data[px + 1] = color[1];
+        framebuffer.data[px + 2] = color[2];
+        framebuffer.data[px + 3] = color[3];
     }
 };
